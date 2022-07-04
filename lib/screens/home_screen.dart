@@ -1,23 +1,25 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
+
 import 'package:geolocator/geolocator.dart';
 import '../models/location_model.dart';
 import '../models/result.dart';
-import '../services/second_screen_service.dart' as service;
+import '../services/home_screen_service.dart' as service;
 import 'package:weather_app/models/weather_model.dart';
 
-class SecondScreen extends StatefulWidget {
-  const SecondScreen({Key? key}) : super(key: key);
+import '../services/notification_api.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return SecondScreenState();
+    return HomeScreenState();
   }
 }
 
-class SecondScreenState extends State<SecondScreen> {
+class HomeScreenState extends State<HomeScreen> {
   Result? result;
   Timer? timer;
 
@@ -75,7 +77,6 @@ class SecondScreenState extends State<SecondScreen> {
                                         return '$locality, ';
                                       }
                                     })(result?.currentPlacemark.name)}${result?.currentWeatherData.name}'),
-
                                   ])
                             ],
                           ),
@@ -104,16 +105,21 @@ class SecondScreenState extends State<SecondScreen> {
   @override
   void initState() {
     super.initState();
+    NotificationApi.init();
     fetchData().then((value) => {
           setState(() {
             result = value;
           })
         });
-    timer = Timer.periodic(const Duration(minutes: 30), (timer) async {
+    timer = Timer.periodic(const Duration(minutes: 1), (timer) async {
       Result res = await fetchData();
       setState(() {
         result = res;
       });
+      NotificationApi.showNotification(
+        title: result?.currentWeatherData.temperature.toString(),
+        body: result?.currentPlacemark.name,
+      );
     });
   }
 

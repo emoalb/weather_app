@@ -1,7 +1,7 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:weather_app/screens/second_screen.dart';
+import 'package:weather_app/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
           fontFamily:'Georgia'),
      initialRoute: '/',
         routes: {
-          '/': (context) => const SecondScreen(),
+          '/': (context) => const HomeScreen(),
         }
         );
   }

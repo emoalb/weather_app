@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:geocoding/geocoding.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:weather_app/models/location_model.dart';
