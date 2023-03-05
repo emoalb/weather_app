@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationApi {
@@ -5,9 +6,9 @@ class NotificationApi {
 
   static Future init({bool isScheduled = false}) async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iOS = IOSInitializationSettings();
+    const iOS = DarwinInitializationSettings();
     const settings = InitializationSettings(android: android, iOS: iOS);
-    await _notifications.initialize(settings,onSelectNotification: (payload)async{});
+    await _notifications.initialize(settings,onDidReceiveNotificationResponse: (payload)async{});
   }
 
   static Future showNotification(
@@ -26,7 +27,9 @@ class NotificationApi {
           'channel id',
           'channel name',
           importance: Importance.max,
+          icon: 'cloudy',
+          colorized: true
         ),
-        iOS: IOSNotificationDetails());
+        iOS: DarwinNotificationDetails());
   }
 }

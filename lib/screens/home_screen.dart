@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:weather_app/models/weather_forecast/weather_forecast_model.dart';
 import '../models/location_model.dart';
 import '../models/result.dart';
 import '../services/home_screen_service.dart' as service;
@@ -21,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   Result? result;
+  WeatherForecastModel? model;
   Timer? timer;
 
   @override
@@ -39,57 +42,86 @@ class HomeScreenState extends State<HomeScreen> {
               builder: (BuildContext context) {
                 return result == null
                     ? const Center(child: CircularProgressIndicator())
-                    : ListView(
-                        children: [
-                          Row(
+                    : ListView(children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Image.network(
+                                      "http://openweathermap.org/img/wn/${result?.currentWeatherData.icon}@2x.png"),
+                                  Text(
+                                      '${result?.currentWeatherData.temperature.toStringAsFixed(1)}')
+                                ]),
+                            Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: () async {
+                                        Result res = await fetchData();
+                                        WeatherForecastModel mod = await fetchWeatherForecast();
+                                        setState(() {
+                                          result = res;
+                                          model = mod;
+                                        });
+                                      },
+                                      child: const Icon(
+                                          CupertinoIcons.location_solid)),
+                                  Text('${((String? locality) {
+                                    if (locality == null || locality.isEmpty) {
+                                      return '';
+                                    } else {
+                                      return '$locality, ';
+                                    }
+                                  })(result?.currentPlacemark.name)}${result?.currentWeatherData.name}'),
+                                ]),
+                          ],
+                        ),
+                        Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Image.network(
-                                        "http://openweathermap.org/img/wn/${result?.currentWeatherData.icon}@2x.png"),
-                                    Text(
-                                        '${result?.currentWeatherData.temperature.toStringAsFixed(1)}')
-                                  ]),
-                              Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ElevatedButton(
-                                        onPressed: () async {
-                                          Result res = await fetchData();
-                                          setState(() {
-                                            result = res;
-                                          });
-                                        },
-                                        child: const Icon(
-                                            CupertinoIcons.location_solid)),
-                                    Text('${((String? locality) {
-                                      if (locality == null ||
-                                          locality.isEmpty) {
-                                        return '';
-                                      } else {
-                                        return '$locality, ';
-                                      }
-                                    })(result?.currentPlacemark.name)}${result?.currentWeatherData.name}'),
-                                  ])
-                            ],
-                          ),
-                          Center(
-                              child: Column(
-                            children: [
-                              Text(
-                                  '${result?.currentPosition.timestamp?.day}/${result?.currentPosition.timestamp?.month}/${result?.currentPosition.timestamp?.year} ${result?.currentPosition.timestamp?.hour}:${result?.currentPosition.timestamp?.minute}'),
-                              Text('${result?.currentWeatherData.weather}'),
-                            ],
-                          ))
-                        ],
-                      );
+                              Center(
+                                  child: Column(
+                                children: [
+                                  Text(
+                                      '${result?.currentPosition.timestamp?.day}/${result?.currentPosition.timestamp?.month}'
+                                          '/${result?.currentPosition.timestamp?.year} ${result?.currentPosition.timestamp?.hour}:'
+                                          '${result?.currentPosition.timestamp?.minute}'),
+                                  Text('${result?.currentWeatherData.weather}'),
+                                ],
+                              ))
+                            ]),
+                        Container(
+                            height: 150,
+                            margin: const EdgeInsets.all(10.0),
+                            child: Builder(builder: (BuildContext context) {
+                              return model == null
+                                  ? const Center(
+                                      child: CircularProgressIndicator())
+                                  : ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: model?.list.length,
+                                      itemBuilder: (context, i) {
+                                        return Container(
+                                            margin: const EdgeInsets.all(10),
+                                            height: 80,
+                                            child: Column(children: [
+                                              Text(model!.list[i].dt_txt),
+                                              Text(model!.list[i].temperature.toStringAsFixed(1)),
+                                              Image.network(
+                                                  "http://openweathermap.org/img/wn/${model?.list[i].icon}.png"),
+                                              Text(model!.list[i].weather)
+                                            ]));
+                                      });
+                            })),
+                      ]);
               },
             )));
   }
@@ -102,24 +134,36 @@ class HomeScreenState extends State<HomeScreen> {
     return result;
   }
 
+  Future<WeatherForecastModel> fetchWeatherForecast() async {
+    Position position = await service.getCurrentPosition();
+    WeatherForecastModel model = await service.fetchWeatherForecast(position);
+    return model;
+  }
+
   @override
   void initState() {
     super.initState();
     NotificationApi.init();
-    fetchData().then((value) => {
+       fetchData().then((value) => {
           setState(() {
             result = value;
           })
         });
-    timer = Timer.periodic(const Duration(minutes: 1), (timer) async {
+
+    fetchWeatherForecast().then((value) => {
+          setState(() {
+            model = value;
+          })
+        });
+
+    timer = Timer.periodic(const Duration(seconds: 20), (timer) async {
       Result res = await fetchData();
       setState(() {
         result = res;
       });
       NotificationApi.showNotification(
-        title: result?.currentWeatherData.temperature.toString(),
-        body: result?.currentPlacemark.name,
-      );
+          title: result?.currentWeatherData.temperature.toStringAsFixed(1),
+          body: result?.currentPlacemark.name);
     });
   }
 

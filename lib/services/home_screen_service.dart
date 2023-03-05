@@ -4,11 +4,12 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:weather_app/models/location_model.dart';
+import 'package:weather_app/models/weather_forecast/weather_forecast_model.dart';
 
 import '../models/weather_model.dart';
 import 'package:http/http.dart' as http;
 
-const API_KEY = "***";
+const API_KEY = "******";
 
 Future<LocationData> getAddressFromLatLng(Position position) async {
   String url =
@@ -22,16 +23,6 @@ Future<LocationData> getAddressFromLatLng(Position position) async {
   }
 }
 
-void fetchWeatherForecast(Position position) async {
-  String url =
-      "https://api.openweathermap.org/data/2.5/forecast?lat=${position.latitude}&lon=${position.longitude}&appid=$API_KEY";
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode == 200) {
-    //return LocationData.fromJson(jsonDecode(response.body));
-  } else {
-    throw Exception('Failed to load data');
-  }
-}
 
 Future<WeatherData> fetchWeatherData(Position position) async {
   String url =
@@ -40,6 +31,17 @@ Future<WeatherData> fetchWeatherData(Position position) async {
 
   if (response.statusCode == 200) {
     return WeatherData.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load data');
+  }
+}
+Future<WeatherForecastModel> fetchWeatherForecast(Position position) async {
+  String url =
+      "https://api.openweathermap.org/data/2.5/forecast?lat=${position.latitude}&lon=${position.longitude}&appid=$API_KEY";
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    return WeatherForecastModel.fromJson(jsonDecode(response.body));
   } else {
     throw Exception('Failed to load data');
   }

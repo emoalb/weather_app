@@ -9,14 +9,14 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
+        preferredSize: preferredSize,
         child: Center(
             child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [
           appbarButton(icon: Icons.home, onPressed: ()=>{Navigator.pushNamed(context, "/")}),
           appbarButton(icon: Icons.add_location_alt,
               onPressed: () => {Navigator.pushNamed(context, "/second")}),
           appbarButton(icon: Icons.access_alarm, onPressed: () => {}),
-        ])),
-        preferredSize: preferredSize);
+        ])));
 
   }
 }
