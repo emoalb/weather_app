@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,7 +9,7 @@ import 'package:weather_app/models/weather_forecast/weather_forecast_model.dart'
 import '../models/weather_model.dart';
 import 'package:http/http.dart' as http;
 
-const API_KEY = "******";
+String API_KEY = dotenv.env['API_KEY']!;
 
 Future<LocationData> getAddressFromLatLng(Position position) async {
   String url =
