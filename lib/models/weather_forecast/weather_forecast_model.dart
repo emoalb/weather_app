@@ -10,7 +10,8 @@ class WeatherForecastModel {
 
   factory WeatherForecastModel.fromJson(Map<String, dynamic> json) {
     var listObjsJson = json["list"] as List;
-     List<WeatherForecastListItem> lst = listObjsJson.map((e) => WeatherForecastListItem.fromJson(e)).toList();
+     List<WeatherForecastListItem> lst = listObjsJson.map((e) =>
+         WeatherForecastListItem.fromJson(e)).toList();
      return WeatherForecastModel(
         name: json["city"]["name"],
           list: lst);

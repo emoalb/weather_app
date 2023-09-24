@@ -156,7 +156,7 @@ class HomeScreenState extends State<HomeScreen> {
           })
         });
 
-    timer = Timer.periodic(const Duration(seconds: 20), (timer) async {
+    timer = Timer.periodic(const Duration(seconds: 200), (timer) async {
       Result res = await fetchData();
       setState(() {
         result = res;
